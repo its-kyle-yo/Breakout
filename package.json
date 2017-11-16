@@ -5,11 +5,11 @@
   "main": "game.js",
   "scripts": {
     "postinstall": "git checkout pull && git checkout WIP",
-    "deploy": "browserify js/game.js -o static/bundle.js -t [ babelify --presets [ es2015 ] ] && git push origin WIP",
+    "deploy": "git push origin WIP",
     "start": "watchify js/game.js -o static/bundle.js -t [ babelify --presets [ es2015 ] ]"
   },
   "keywords": [],
-  "author": "",
+  "author": "Kyle Thomas",
   "license": "ISC",
   "devDependencies": {
     "babel-core": "^6.26.0",
