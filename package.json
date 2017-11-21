@@ -6,7 +6,8 @@
   "scripts": {
     "postinstall": "git checkout pull && git checkout WIP",
     "deploy": "browserify js/game.js -o static/bundle.js -t [ babelify --presets [ es2015 ] ] && git push origin WIP",
-    "start": "watchify js/game.js -o static/bundle.js -t [ babelify --presets [ es2015 ] ]"
+    "open": "./node_modules/.bin/opener ./index.html",
+    "start": "npm run open && watchify js/game.js -o static/bundle.js -t [ babelify --presets [ es2015 ] ]"
   },
   "keywords": [],
   "author": "Kyle Thomas",
@@ -14,6 +15,8 @@
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
-    "babelify": "^8.0.0"
-  }
+    "babelify": "^8.0.0",
+    "opener": "^1.4.3"
+  },
+  "dependencies": {}
 }
