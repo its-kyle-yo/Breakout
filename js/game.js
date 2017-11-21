@@ -1,4 +1,4 @@
-let game, gameContext, ball, player, player2, debug, wall;
+let game, gameContext, ball, player, debug, wall;
 import {gameSettings} from './settings';
 import { Player,BrickWall,Ball } from './game-objects';
 import { colorRect } from './helpers';
@@ -9,7 +9,7 @@ window.onload = () => {
   game.center = { x: game.width / 2, y: game.height / 2};
   // Make a new player and ball
   ball = new Ball(gameContext, [game.center.x, game.center.y], 'orange', game.center.x, game.center.y);
-  player = new Player(gameContext, 'orange', game.center.x);
+  player = new Player(gameContext, ball, 'orange', game.center.x);
   wall = new BrickWall(gameContext);
 
   // Adds player mouse controls
@@ -26,7 +26,8 @@ window.onload = () => {
 // Each object needs to be drawn and redrawn each "frame"
 function run () {
   drawBg(gameSettings.bgColor, gameContext);
-  ball.move(game.width, game.height, player);
+  ball.move(game.width, game.height);
+  player.ball = ball;
   ball.draw();
   player.draw(debug);
   wall.draw();

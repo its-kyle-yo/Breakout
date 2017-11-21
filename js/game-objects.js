@@ -10,34 +10,37 @@ export class BrickWall{
   draw(size = 8){
     for(let i = 0; i <= 8; i++){
       let brick = new Brick(true, this.width, this.height);
-      if(i === 0){
-        colorRect(this.gameContext, 0,0,this.width - 2 , this.height, 'yellow');
-      } else {
-        colorRect(this.gameContext, this.width * i ,0,this.width - 2, this.height, 'yellow');
-      }
+      colorRect(this.gameContext, this.width * i ,0,this.width - 2, this.height, 'yellow');
     }
   }
 }
 
 export class Brick {
-  constructor(visible, width, height){
+  constructor(gameContext, visible, width, height, color){
     this.visible = visible;
     this.width = width;
     this.height = height;
+    this.color = color;
+    this.gameContext = gameContext;
   }
 
   speak(){
     console.log(this.visible, this.width, this.height);
   }
+
+  draw(offset, row) {
+    colorRect(this.gameContext, 0,0,this.width - 2 , this.height, 'yellow');
+  }
 }
 export class Player {
-  constructor(gameContext, color, startingX = 0, startingY = 500, size = 10, width = 150){
+  constructor(gameContext, ball, color, startingX = 0, startingY = 500, size = 10, width = 150){
     this.x = startingX;
     this.y = startingY;
     this.size = size;
     this.width = width;
     this.gameContext = gameContext;
     this.color = color;
+    this.ball = ball;
   }
 
   debug(x,y){
@@ -49,6 +52,22 @@ export class Player {
     colorRect(this.gameContext, this.x, this.y, this.width, this.size, this.color);
     if(debug){
       colorText(this.gameContext, `${this.mouseX}, ${this.mouseY}`, this.mouseX, this.mouseY, 'yellow');
+    }
+    let playerTopEdgeY = this.y;
+    let playerBottomEdgeY = playerTopEdgeY + this.size;
+    let playerLeftEdgeX = this.x;
+    let playerRightEdgeX = playerLeftEdgeX + this.width;
+
+    if(this.ball.y > playerTopEdgeY && // below top paddle
+       this.ball.y < playerBottomEdgeY && // above bottom of paddle
+       this.ball.x > playerLeftEdgeX && // right
+       this.ball.x < playerRightEdgeX){ //left
+         this.ball.ySpeed = -this.ball.ySpeed;
+         console.log('HIT:' , this.ball.x, this.ball.y);
+         let playerCenter = this.x + this.width/2;
+         let distFromCenter = this.ball.x - playerCenter;
+         this.ball.xSpeed = (distFromCenter * 0.35 > this.ball.topSpeed || distFromCenter * 0.35 < -this.ball.topSpeed)  ? this.ball.topSpeed : distFromCenter * 0.35;
+         console.log(`Ball Speed (rounded): ${Math.round(this.ball.xSpeed)}/pps`);
     }
   }
 
@@ -88,22 +107,21 @@ export class Ball {
         this.reset();
       }
 
-      let playerTopEdgeY = player.y - (this.size / 2);
-      let playerBottomEdgeY = playerTopEdgeY + player.size;
-      let playerLeftEdgeX = player.x;
-      let playerRightEdgeX = playerLeftEdgeX + player.width;
-
-      if(this.y > playerTopEdgeY && // below top paddle
-         this.y < playerBottomEdgeY && // above bottom of paddle
-         this.x > playerLeftEdgeX && // right
-         this.x < playerRightEdgeX){ //left
-           this.ySpeed = -this.ySpeed;
-
-           let playerCenter = player.x + player.width/2;
-           let distFromCenter = this.x - playerCenter;
-           this.xSpeed = (distFromCenter * 0.35 > this.topSpeed || distFromCenter * 0.35 < -this.topSpeed)  ? this.topSpeed : distFromCenter * 0.35;
-           console.log(`Ball Speed (rounded): ${Math.round(this.xSpeed)}/pps`);
-         }
+      // let playerTopEdgeY = player.y - (this.size / 2);
+      // let playerBottomEdgeY = playerTopEdgeY + player.size;
+      // let playerLeftEdgeX = player.x;
+      // let playerRightEdgeX = playerLeftEdgeX + player.width;
+      //
+      // if(this.y > playerTopEdgeY && // below top paddle
+      //    this.y < playerBottomEdgeY && // above bottom of paddle
+      //    this.x > playerLeftEdgeX && // right
+      //    this.x < playerRightEdgeX){ //left
+      //      this.ySpeed = -this.ySpeed;
+      //      let playerCenter = player.x + player.width/2;
+      //      let distFromCenter = this.x - playerCenter;
+      //      this.xSpeed = (distFromCenter * 0.35 > this.topSpeed || distFromCenter * 0.35 < -this.topSpeed)  ? this.topSpeed : distFromCenter * 0.35;
+      //      console.log(`Ball Speed (rounded): ${Math.round(this.xSpeed)}/pps`);
+      // }
 
     }
 
