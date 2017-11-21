@@ -1,6 +1,6 @@
-let game, gameContext, ball, player, player2;
-import {Ball, gameSettings} from './settings';
-import { Player } from './player'
+let game, gameContext, ball, player, player2, debug, wall;
+import {gameSettings} from './settings';
+import { Player,BrickWall,Ball } from './game-objects';
 import { colorRect } from './helpers';
 
 window.onload = () => {
@@ -10,10 +10,14 @@ window.onload = () => {
   // Make a new player and ball
   ball = new Ball(gameContext, [game.center.x, game.center.y], 'orange', game.center.x, game.center.y);
   player = new Player(gameContext, 'orange', game.center.x);
+  wall = new BrickWall(gameContext);
 
   // Adds player mouse controls
   game.addEventListener('mousemove', movePlayer);
-
+  debug = true;
+  if(debug){
+    game.addEventListener('mousemove', playerDebug);
+  }
   // Run the game!
   setInterval(run, gameSettings.fps);
 };
@@ -24,16 +28,25 @@ function run () {
   drawBg(gameSettings.bgColor, gameContext);
   ball.move(game.width, game.height, player);
   ball.draw();
-  player.draw();
+  player.draw(debug);
+  wall.draw();
 }
 
 function drawBg(bgColor, gameContext) {
   colorRect(gameContext, 0, 0, game.width, game.height, bgColor);
 }
 
-function movePlayer({clientX}) {
+function movePlayer({clientX, clientY}) {
   let rect = game.getBoundingClientRect();
-  let root = document.documentElement
+  let root = document.documentElement;
   let x = clientX - rect.left - root.scrollLeft;
   player.move(x);
+}
+
+function playerDebug({clientX, clientY}){
+  let rect = game.getBoundingClientRect();
+  let root = document.documentElement;
+  let x = clientX - rect.left - root.scrollLeft;
+  let y = clientY - rect.top - root.scrollTop;
+  player.debug(x, y);
 }
