@@ -5,7 +5,7 @@
   "main": "game.js",
   "scripts": {
     "postinstall": "git checkout pull && git checkout WIP",
-    "deploy": "browserify js/game.js -o static/bundle.js -t [ babelify --presets [ es2015 ] ] && git push origin WIP",
+    "deploy": "browserify js/game.js -o static/bundle.js -t [ babelify --presets [ es2015 ] ] && git add static/bundle.js && git commit -m 'Deploying Latest' && git push origin WIP",
     "open": "./node_modules/.bin/opener ./index.html",
     "start": "npm run open && watchify js/game.js -o static/bundle.js -t [ babelify --presets [ es2015 ] ]"
   },
