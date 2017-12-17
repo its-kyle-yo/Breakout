@@ -15,10 +15,23 @@ export class BrickWall{
   }
 
   draw(){
-    if(this.visible){
-      colorRect(this.gameContext, this.x, this.y, this.width - this.spacing, this.height - this.spacing, this.color);
+    let len = this.bricks.length - 1;
+    let counter = 0;
+    //
+    // for(let currentBrick = 0; currentBrick <= len; currentBrick++){
+    //
+    // }
+    // For each brick we want to draw, we draw the total amount that can fit in the canvas (game.width/(brick.width - brick.spacing))
+    //
+    for(let col = 0; col <= len; col++){
+      if(col % 16 === 0){
+        counter++;
+      }
+      this.bricks[col].draw(col, counter)
     }
-    // Random thoughs and scribbles
+    //this.bricks[0-31].draw()
+    //
+    //
     //
     // for(let i = 0; i <= this.bricks.length - 1; i++){
     //   if(this.bricks[i].visible) {
@@ -33,7 +46,7 @@ export class BrickWall{
 }
 
 export class Brick {
-  constructor(gameContext, index, visible = true, width = 50, height = 50, color = 'yellow'){
+  constructor(gameContext, index, visible = true, width = 100, height = 50, color = 'yellow'){
     this.index = index;
     this.visible = visible;
     this.width = width;
