@@ -4,7 +4,7 @@
   "description": "",
   "main": "game.js",
   "scripts": {
-    "postinstall": "git checkout pull && git checkout WIP",
+    "postinstall": "git checkout WIP",
     "deploy": "git push origin WIP",
     "start": "watchify js/game.js -o static/bundle.js -t [ babelify --presets [ es2015 ] ]"
   },
