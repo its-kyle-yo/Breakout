@@ -15,7 +15,7 @@ export class BrickWall{
   }
 
   draw(){
-    let len = this.bricks.length - 1;
+    let len = this.bricks.length;
     let counter = 0;
     //
     // for(let currentBrick = 0; currentBrick <= len; currentBrick++){
@@ -23,11 +23,14 @@ export class BrickWall{
     // }
     // For each brick we want to draw, we draw the total amount that can fit in the canvas (game.width/(brick.width - brick.spacing))
     //
-    for(let col = 0; col <= len; col++){
+    var col = 0;
+    for(let i = 0; i < len; i++){
       if(col % 16 === 0){
         counter++;
+        col = 0;
       }
-      this.bricks[col].draw(col, counter)
+      this.bricks[i].draw(col, counter);
+      col++;
     }
     //this.bricks[0-31].draw()
     //
@@ -65,12 +68,9 @@ export class Brick {
   draw(col, row) {
     this.x = this.width * col;
     this.y = this.height * row;
-    if(this.visible){
-      colorRect(this.gameContext, this.x, this.y, this.width - this.spacing, this.height - this.spacing, this.color);
-      colorText(this.gameContext,`${this.index + 1}(${this.index}),${col},${row + 1}`, this.x + (this.width/2 - 20), this.y + (this.height/2),'black');
-    } else {
-      return;
-    }
+    if(!this.visible) return;
+    colorRect(this.gameContext, this.x, this.y, this.width - this.spacing, this.height - this.spacing, this.color);
+    colorText(this.gameContext,`${this.index + 1}(${this.index}),${col},${row + 1}`, this.x + (this.width/2 - 20), this.y + (this.height/2),'black');
   }
 }
 export class Player {

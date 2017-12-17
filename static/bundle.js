@@ -37,10 +37,26 @@ var BrickWall = exports.BrickWall = function () {
   }, {
     key: 'draw',
     value: function draw() {
-      if (this.visible) {
-        (0, _helpers.colorRect)(this.gameContext, this.x, this.y, this.width - this.spacing, this.height - this.spacing, this.color);
+      var len = this.bricks.length;
+      var counter = 0;
+      //
+      // for(let currentBrick = 0; currentBrick <= len; currentBrick++){
+      //
+      // }
+      // For each brick we want to draw, we draw the total amount that can fit in the canvas (game.width/(brick.width - brick.spacing))
+      //
+      var col = 0;
+      for (var i = 0; i < len; i++) {
+        if (col % 16 === 0) {
+          counter++;
+          col = 0;
+        }
+        this.bricks[i].draw(col, counter);
+        col++;
       }
-      // Random thoughs and scribbles
+      //this.bricks[0-31].draw()
+      //
+      //
       //
       // for(let i = 0; i <= this.bricks.length - 1; i++){
       //   if(this.bricks[i].visible) {
@@ -60,7 +76,7 @@ var BrickWall = exports.BrickWall = function () {
 var Brick = exports.Brick = function () {
   function Brick(gameContext, index) {
     var visible = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-    var width = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 50;
+    var width = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 100;
     var height = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 50;
     var color = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 'yellow';
 
@@ -87,12 +103,9 @@ var Brick = exports.Brick = function () {
     value: function draw(col, row) {
       this.x = this.width * col;
       this.y = this.height * row;
-      if (this.visible) {
-        (0, _helpers.colorRect)(this.gameContext, this.x, this.y, this.width - this.spacing, this.height - this.spacing, this.color);
-        (0, _helpers.colorText)(this.gameContext, this.index + 1 + '(' + this.index + '),' + col + ',' + (row + 1), this.x + (this.width / 2 - 20), this.y + this.height / 2, 'black');
-      } else {
-        return;
-      }
+      if (!this.visible) return;
+      (0, _helpers.colorRect)(this.gameContext, this.x, this.y, this.width - this.spacing, this.height - this.spacing, this.color);
+      (0, _helpers.colorText)(this.gameContext, this.index + 1 + '(' + this.index + '),' + col + ',' + (row + 1), this.x + (this.width / 2 - 20), this.y + this.height / 2, 'black');
     }
   }]);
 
