@@ -1,35 +1,63 @@
 import { colorRect, colorText, colorCircle } from './helpers';
 export class BrickWall{
-  constructor(gameContext, width = 100, height = 50){
+  constructor(gameContext, ball, size = 32){
     this.gameContext = gameContext;
-    this.width = width;
-    this.height = height;
-    this.bricks = [];
+    this.size = size;
+    this.grid = { row: 4, col: 8,};
+    this.bricks = new Array(size);
   }
 
-  draw(size = 8){
-    for(let i = 0; i <= 8; i++){
-      let brick = new Brick(true, this.width, this.height);
-      colorRect(this.gameContext, this.width * i ,0,this.width - 2, this.height, 'yellow');
+  init() {
+    for(let i = 0; i <= this.bricks.length - 1; i++){
+      this.bricks[i] = new Brick(this.gameContext, i);
     }
+    console.log(this.bricks);
+  }
+
+  draw(){
+    if(this.visible){
+      colorRect(this.gameContext, this.x, this.y, this.width - this.spacing, this.height - this.spacing, this.color);
+    }
+    // Random thoughs and scribbles
+    //
+    // for(let i = 0; i <= this.bricks.length - 1; i++){
+    //   if(this.bricks[i].visible) {
+    //
+    //   }
+    //   if(i % 7 === 0 ){
+    //     this.bricks[i].draw(i,i * this.bricks[i].height);
+    //   }
+    //   // colorRect(this.gameContext, this.width * i ,0,this.width - 2, this.height, 'yellow');
+    // }
   }
 }
 
 export class Brick {
-  constructor(gameContext, visible, width, height, color){
+  constructor(gameContext, index, visible = true, width = 50, height = 50, color = 'yellow'){
+    this.index = index;
     this.visible = visible;
     this.width = width;
     this.height = height;
     this.color = color;
     this.gameContext = gameContext;
+    this.spacing = 2;
+    this.x;
+    this.y;
   }
 
   speak(){
     console.log(this.visible, this.width, this.height);
   }
 
-  draw(offset, row) {
-    colorRect(this.gameContext, 0,0,this.width - 2 , this.height, 'yellow');
+  draw(col, row) {
+    this.x = this.width * col;
+    this.y = this.height * row;
+    if(this.visible){
+      colorRect(this.gameContext, this.x, this.y, this.width - this.spacing, this.height - this.spacing, this.color);
+      colorText(this.gameContext,`${this.index + 1}(${this.index}),${col},${row + 1}`, this.x + (this.width/2 - 20), this.y + (this.height/2),'black');
+    } else {
+      return;
+    }
   }
 }
 export class Player {
@@ -49,21 +77,24 @@ export class Player {
   }
 
   draw(debug) {
+    // Draw the backgroudn
     colorRect(this.gameContext, this.x, this.y, this.width, this.size, this.color);
     if(debug){
-      colorText(this.gameContext, `${this.mouseX}, ${this.mouseY}`, this.mouseX, this.mouseY, 'yellow');
+      // Draw Mouse x/y coords
+      colorText(this.gameContext, `${this.mouseX}, ${this.mouseY}`, this.mouseX, this.mouseY, 'white');
     }
     let playerTopEdgeY = this.y;
     let playerBottomEdgeY = playerTopEdgeY + this.size;
     let playerLeftEdgeX = this.x;
     let playerRightEdgeX = playerLeftEdgeX + this.width;
 
+    // Paddle Collisions
     if(this.ball.y > playerTopEdgeY && // below top paddle
        this.ball.y < playerBottomEdgeY && // above bottom of paddle
        this.ball.x > playerLeftEdgeX && // right
        this.ball.x < playerRightEdgeX){ //left
          this.ball.ySpeed = -this.ball.ySpeed;
-         console.log('HIT:' , this.ball.x, this.ball.y);
+         console.log(`HIT! x: ${this.ball.x} y: ${this.ball.y}`);
          let playerCenter = this.x + this.width/2;
          let distFromCenter = this.ball.x - playerCenter;
          this.ball.xSpeed = (distFromCenter * 0.35 > this.ball.topSpeed || distFromCenter * 0.35 < -this.ball.topSpeed)  ? this.ball.topSpeed : distFromCenter * 0.35;

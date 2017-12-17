@@ -15,31 +15,42 @@ var _helpers = require('./helpers');
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var BrickWall = exports.BrickWall = function () {
-  function BrickWall(gameContext) {
-    var width = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 100;
-    var height = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 50;
+  function BrickWall(gameContext, ball) {
+    var size = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 32;
 
     _classCallCheck(this, BrickWall);
 
     this.gameContext = gameContext;
-    this.width = width;
-    this.height = height;
-    this.bricks = [];
+    this.size = size;
+    this.grid = { row: 4, col: 8 };
+    this.bricks = new Array(size);
   }
 
   _createClass(BrickWall, [{
+    key: 'init',
+    value: function init() {
+      for (var i = 0; i <= this.bricks.length - 1; i++) {
+        this.bricks[i] = new Brick(this.gameContext, i);
+      }
+      console.log(this.bricks);
+    }
+  }, {
     key: 'draw',
     value: function draw() {
-      var size = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 8;
-
-      for (var i = 0; i <= 8; i++) {
-        var brick = new Brick(true, this.width, this.height);
-        if (i === 0) {
-          (0, _helpers.colorRect)(this.gameContext, 0, 0, this.width - 2, this.height, 'yellow');
-        } else {
-          (0, _helpers.colorRect)(this.gameContext, this.width * i, 0, this.width - 2, this.height, 'yellow');
-        }
+      if (this.visible) {
+        (0, _helpers.colorRect)(this.gameContext, this.x, this.y, this.width - this.spacing, this.height - this.spacing, this.color);
       }
+      // Random thoughs and scribbles
+      //
+      // for(let i = 0; i <= this.bricks.length - 1; i++){
+      //   if(this.bricks[i].visible) {
+      //
+      //   }
+      //   if(i % 7 === 0 ){
+      //     this.bricks[i].draw(i,i * this.bricks[i].height);
+      //   }
+      //   // colorRect(this.gameContext, this.width * i ,0,this.width - 2, this.height, 'yellow');
+      // }
     }
   }]);
 
@@ -47,12 +58,23 @@ var BrickWall = exports.BrickWall = function () {
 }();
 
 var Brick = exports.Brick = function () {
-  function Brick(visible, width, height) {
+  function Brick(gameContext, index) {
+    var visible = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+    var width = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 50;
+    var height = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 50;
+    var color = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 'yellow';
+
     _classCallCheck(this, Brick);
 
+    this.index = index;
     this.visible = visible;
     this.width = width;
     this.height = height;
+    this.color = color;
+    this.gameContext = gameContext;
+    this.spacing = 2;
+    this.x;
+    this.y;
   }
 
   _createClass(Brick, [{
@@ -60,17 +82,29 @@ var Brick = exports.Brick = function () {
     value: function speak() {
       console.log(this.visible, this.width, this.height);
     }
+  }, {
+    key: 'draw',
+    value: function draw(col, row) {
+      this.x = this.width * col;
+      this.y = this.height * row;
+      if (this.visible) {
+        (0, _helpers.colorRect)(this.gameContext, this.x, this.y, this.width - this.spacing, this.height - this.spacing, this.color);
+        (0, _helpers.colorText)(this.gameContext, this.index + 1 + '(' + this.index + '),' + col + ',' + (row + 1), this.x + (this.width / 2 - 20), this.y + this.height / 2, 'black');
+      } else {
+        return;
+      }
+    }
   }]);
 
   return Brick;
 }();
 
 var Player = exports.Player = function () {
-  function Player(gameContext, color) {
-    var startingX = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-    var startingY = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 500;
-    var size = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 10;
-    var width = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 150;
+  function Player(gameContext, ball, color) {
+    var startingX = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+    var startingY = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 500;
+    var size = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 10;
+    var width = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : 150;
 
     _classCallCheck(this, Player);
 
@@ -80,6 +114,7 @@ var Player = exports.Player = function () {
     this.width = width;
     this.gameContext = gameContext;
     this.color = color;
+    this.ball = ball;
   }
 
   _createClass(Player, [{
@@ -91,9 +126,29 @@ var Player = exports.Player = function () {
   }, {
     key: 'draw',
     value: function draw(debug) {
+      // Draw the backgroudn
       (0, _helpers.colorRect)(this.gameContext, this.x, this.y, this.width, this.size, this.color);
       if (debug) {
-        (0, _helpers.colorText)(this.gameContext, this.mouseX + ', ' + this.mouseY, this.mouseX, this.mouseY, 'yellow');
+        // Draw Mouse x/y coords
+        (0, _helpers.colorText)(this.gameContext, this.mouseX + ', ' + this.mouseY, this.mouseX, this.mouseY, 'white');
+      }
+      var playerTopEdgeY = this.y;
+      var playerBottomEdgeY = playerTopEdgeY + this.size;
+      var playerLeftEdgeX = this.x;
+      var playerRightEdgeX = playerLeftEdgeX + this.width;
+
+      // Paddle Collisions
+      if (this.ball.y > playerTopEdgeY && // below top paddle
+      this.ball.y < playerBottomEdgeY && // above bottom of paddle
+      this.ball.x > playerLeftEdgeX && // right
+      this.ball.x < playerRightEdgeX) {
+        //left
+        this.ball.ySpeed = -this.ball.ySpeed;
+        console.log('HIT! x: ' + this.ball.x + ' y: ' + this.ball.y);
+        var playerCenter = this.x + this.width / 2;
+        var distFromCenter = this.ball.x - playerCenter;
+        this.ball.xSpeed = distFromCenter * 0.35 > this.ball.topSpeed || distFromCenter * 0.35 < -this.ball.topSpeed ? this.ball.topSpeed : distFromCenter * 0.35;
+        console.log('Ball Speed (rounded): ' + Math.round(this.ball.xSpeed) + '/pps');
       }
     }
   }, {
@@ -153,23 +208,21 @@ var Ball = exports.Ball = function () {
         this.reset();
       }
 
-      var playerTopEdgeY = player.y - this.size / 2;
-      var playerBottomEdgeY = playerTopEdgeY + player.size;
-      var playerLeftEdgeX = player.x;
-      var playerRightEdgeX = playerLeftEdgeX + player.width;
-
-      if (this.y > playerTopEdgeY && // below top paddle
-      this.y < playerBottomEdgeY && // above bottom of paddle
-      this.x > playerLeftEdgeX && // right
-      this.x < playerRightEdgeX) {
-        //left
-        this.ySpeed = -this.ySpeed;
-
-        var playerCenter = player.x + player.width / 2;
-        var distFromCenter = this.x - playerCenter;
-        this.xSpeed = distFromCenter * 0.35 > this.topSpeed || distFromCenter * 0.35 < -this.topSpeed ? this.topSpeed : distFromCenter * 0.35;
-        console.log('Ball Speed (rounded): ' + Math.round(this.xSpeed) + '/pps');
-      }
+      // let playerTopEdgeY = player.y - (this.size / 2);
+      // let playerBottomEdgeY = playerTopEdgeY + player.size;
+      // let playerLeftEdgeX = player.x;
+      // let playerRightEdgeX = playerLeftEdgeX + player.width;
+      //
+      // if(this.y > playerTopEdgeY && // below top paddle
+      //    this.y < playerBottomEdgeY && // above bottom of paddle
+      //    this.x > playerLeftEdgeX && // right
+      //    this.x < playerRightEdgeX){ //left
+      //      this.ySpeed = -this.ySpeed;
+      //      let playerCenter = player.x + player.width/2;
+      //      let distFromCenter = this.x - playerCenter;
+      //      this.xSpeed = (distFromCenter * 0.35 > this.topSpeed || distFromCenter * 0.35 < -this.topSpeed)  ? this.topSpeed : distFromCenter * 0.35;
+      //      console.log(`Ball Speed (rounded): ${Math.round(this.xSpeed)}/pps`);
+      // }
     }
   }, {
     key: 'draw',
@@ -196,23 +249,23 @@ var game = void 0,
     gameContext = void 0,
     ball = void 0,
     player = void 0,
-    player2 = void 0,
     debug = void 0,
     wall = void 0;
 
-
 window.onload = function () {
+  debug = true;
   game = document.getElementById('game');
+  game.width = 1600;
   gameContext = game.getContext('2d');
   game.center = { x: game.width / 2, y: game.height / 2 };
   // Make a new player and ball
   ball = new _gameObjects.Ball(gameContext, [game.center.x, game.center.y], 'orange', game.center.x, game.center.y);
-  player = new _gameObjects.Player(gameContext, 'orange', game.center.x);
+  player = new _gameObjects.Player(gameContext, ball, 'orange', game.center.x);
   wall = new _gameObjects.BrickWall(gameContext);
+  wall.init();
 
   // Adds player mouse controls
   game.addEventListener('mousemove', movePlayer);
-  debug = true;
   if (debug) {
     game.addEventListener('mousemove', playerDebug);
   }
@@ -224,7 +277,8 @@ window.onload = function () {
 // Each object needs to be drawn and redrawn each "frame"
 function run() {
   drawBg(_settings.gameSettings.bgColor, gameContext);
-  ball.move(game.width, game.height, player);
+  ball.move(game.width, game.height);
+  player.ball = ball;
   ball.draw();
   player.draw(debug);
   wall.draw();

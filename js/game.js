@@ -1,20 +1,22 @@
-let game, gameContext, ball, player, debug, wall;
 import {gameSettings} from './settings';
 import { Player,BrickWall,Ball } from './game-objects';
 import { colorRect } from './helpers';
+let game, gameContext, ball, player, debug, wall;
 
 window.onload = () => {
+  debug = true;
   game = document.getElementById('game');
+  game.width = 1600;
   gameContext = game.getContext('2d');
   game.center = { x: game.width / 2, y: game.height / 2};
   // Make a new player and ball
   ball = new Ball(gameContext, [game.center.x, game.center.y], 'orange', game.center.x, game.center.y);
   player = new Player(gameContext, ball, 'orange', game.center.x);
-  wall = new BrickWall(gameContext);
+  wall = new BrickWall(gameContext)
+  wall.init();
 
   // Adds player mouse controls
   game.addEventListener('mousemove', movePlayer);
-  debug = true;
   if(debug){
     game.addEventListener('mousemove', playerDebug);
   }
