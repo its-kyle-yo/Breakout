@@ -4,7 +4,7 @@ import { colorRect } from './helpers';
 let game, gameContext, ball, player, debug, wall;
 
 window.onload = () => {
-  debug = true;
+
   game = document.getElementById('game');
   game.width = 1600;
   gameContext = game.getContext('2d');
@@ -12,9 +12,13 @@ window.onload = () => {
   // Make a new player and ball
   ball = new Ball(gameContext, [game.center.x, game.center.y], 'orange', game.center.x, game.center.y);
   player = new Player(gameContext, ball, 'orange', game.center.x);
-  wall = new BrickWall(gameContext)
+  wall = new BrickWall(game, gameContext)
   wall.init();
-
+  debug = {
+    enabled: true,
+    brickSize: wall.bricks[0].width,
+    brickHeight: wall.bricks[0].height,
+  };
   // Adds player mouse controls
   game.addEventListener('mousemove', movePlayer);
   if(debug){

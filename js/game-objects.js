@@ -1,55 +1,46 @@
 import { colorRect, colorText, colorCircle } from './helpers';
 export class BrickWall{
-  constructor(gameContext, ball, size = 32){
+  constructor(game, gameContext, ball, size = 32){
     this.gameContext = gameContext;
+    this.game = game;
     this.size = size;
-    this.grid = { row: 4, col: 8,};
     this.bricks = new Array(size);
+    this.colors = [
+      'red',
+      'yellow',
+      'pink',
+      'green',
+      'purple',
+      'orange',
+      'blue',
+    ]
   }
 
   init() {
     for(let i = 0; i <= this.bricks.length - 1; i++){
-      this.bricks[i] = new Brick(this.gameContext, i);
+      let randomColor = this.colors[Math.floor(Math.random() * this.colors.length) + 1]
+      this.bricks[i] = new Brick(this.gameContext, i, randomColor);
     }
-    console.log(this.bricks);
+    console.table(this.bricks);
   }
 
   draw(){
     let len = this.bricks.length;
     let counter = 0;
-    //
-    // for(let currentBrick = 0; currentBrick <= len; currentBrick++){
-    //
-    // }
-    // For each brick we want to draw, we draw the total amount that can fit in the canvas (game.width/(brick.width - brick.spacing))
-    //
     var col = 0;
     for(let i = 0; i < len; i++){
-      if(col % 16 === 0){
+      if(col % Math.round((this.game.width / this.bricks[0].width)) === 0){
         counter++;
         col = 0;
       }
       this.bricks[i].draw(col, counter);
       col++;
     }
-    //this.bricks[0-31].draw()
-    //
-    //
-    //
-    // for(let i = 0; i <= this.bricks.length - 1; i++){
-    //   if(this.bricks[i].visible) {
-    //
-    //   }
-    //   if(i % 7 === 0 ){
-    //     this.bricks[i].draw(i,i * this.bricks[i].height);
-    //   }
-    //   // colorRect(this.gameContext, this.width * i ,0,this.width - 2, this.height, 'yellow');
-    // }
   }
 }
 
 export class Brick {
-  constructor(gameContext, index, visible = true, width = 100, height = 50, color = 'yellow'){
+  constructor(gameContext, index, color = 'yellow', visible = true, width = 100, height = 50){
     this.index = index;
     this.visible = visible;
     this.width = width;
@@ -70,7 +61,7 @@ export class Brick {
     this.y = this.height * row;
     if(!this.visible) return;
     colorRect(this.gameContext, this.x, this.y, this.width - this.spacing, this.height - this.spacing, this.color);
-    colorText(this.gameContext,`${this.index + 1}(${this.index}),${col},${row + 1}`, this.x + (this.width/2 - 20), this.y + (this.height/2),'black');
+    // colorText(this.gameContext,`${this.index + 1}(${this.index}),${col},${row + 1}`, this.x + (this.width/2 - 20), this.y + (this.height/2),'black');
   }
 }
 export class Player {
@@ -92,9 +83,9 @@ export class Player {
   draw(debug) {
     // Draw the backgroudn
     colorRect(this.gameContext, this.x, this.y, this.width, this.size, this.color);
-    if(debug){
+    if(debug.enabled){
       // Draw Mouse x/y coords
-      colorText(this.gameContext, `${this.mouseX}, ${this.mouseY}`, this.mouseX, this.mouseY, 'white');
+      colorText(this.gameContext, `${this.mouseX / debug.brickSize }, ${this.mouseY/debug.brickSize}`, this.mouseX, this.mouseY, 'white');
     }
     let playerTopEdgeY = this.y;
     let playerBottomEdgeY = playerTopEdgeY + this.size;
@@ -107,15 +98,19 @@ export class Player {
        this.ball.x > playerLeftEdgeX && // right
        this.ball.x < playerRightEdgeX){ //left
          this.ball.ySpeed = -this.ball.ySpeed;
-         console.log(`HIT! x: ${this.ball.x} y: ${this.ball.y}`);
+         // Logging for ball infomatin on hit
+         console.groupCollapsed('HIT');
+         console.log(`Ball x: ${this.ball.x} y: ${this.ball.y}`);
          let playerCenter = this.x + this.width/2;
          let distFromCenter = this.ball.x - playerCenter;
          this.ball.xSpeed = (distFromCenter * 0.35 > this.ball.topSpeed || distFromCenter * 0.35 < -this.ball.topSpeed)  ? this.ball.topSpeed : distFromCenter * 0.35;
          console.log(`Ball Speed (rounded): ${Math.round(this.ball.xSpeed)}/pps`);
+         console.groupEnd('HIT')
     }
   }
 
   move(x){
+    // Centers on mouse x position
     this.x = x - (this.width / 2);
   }
 }
@@ -134,15 +129,24 @@ export class Ball {
     }
 
     reset() {
+      // Set the ball to the center of the game,
+      // reset the speeds to defaults 5,7
       [this.x, this.y] = this.gameCenter;
       [this.xSpeed, this.ySpeed] = [5, 7];
     }
 
     move(gameWidth, gameHeight, player) {
       // Collisions to bound to game canvas
+      // Moves each frame
       this.x += this.xSpeed;
       this.y += this.ySpeed;
-      if(this.x > game.width || this.x < 0){
+
+      //Collisions for the walls
+      this.collide(gameWidth);
+    }
+
+    collide(gameWidth) {
+      if(this.x > gameWidth || this.x < 0){
         this.xSpeed = -this.xSpeed;
       }
       if(this.y < 0){
@@ -150,23 +154,6 @@ export class Ball {
       } else if (this.y > game.height){
         this.reset();
       }
-
-      // let playerTopEdgeY = player.y - (this.size / 2);
-      // let playerBottomEdgeY = playerTopEdgeY + player.size;
-      // let playerLeftEdgeX = player.x;
-      // let playerRightEdgeX = playerLeftEdgeX + player.width;
-      //
-      // if(this.y > playerTopEdgeY && // below top paddle
-      //    this.y < playerBottomEdgeY && // above bottom of paddle
-      //    this.x > playerLeftEdgeX && // right
-      //    this.x < playerRightEdgeX){ //left
-      //      this.ySpeed = -this.ySpeed;
-      //      let playerCenter = player.x + player.width/2;
-      //      let distFromCenter = this.x - playerCenter;
-      //      this.xSpeed = (distFromCenter * 0.35 > this.topSpeed || distFromCenter * 0.35 < -this.topSpeed)  ? this.topSpeed : distFromCenter * 0.35;
-      //      console.log(`Ball Speed (rounded): ${Math.round(this.xSpeed)}/pps`);
-      // }
-
     }
 
     draw() {
